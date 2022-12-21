@@ -25,14 +25,8 @@ struct DisplayInfo {
     scale_factor: f32,
 }
 
-#[tauri::command]
-fn get_screens_name() -> Vec<String> {
-    let mut infos: Vec<String> = vec![];
-    let screens = Screen::all().unwrap();
-
-    for screen in screens {
-        let display_info = screen.display_info;
-
+impl DisplayInfo {
+    fn convert_from(display_info: screenshots::DisplayInfo) -> DisplayInfo{
         let id = display_info.id;
         let x = display_info.x;
         let y = display_info.y;
@@ -42,7 +36,7 @@ fn get_screens_name() -> Vec<String> {
         let rotation = display_info.rotation;
         let scale_factor = display_info.scale_factor;
 
-        let di = DisplayInfo {
+        DisplayInfo {
             id,
             x,
             y,
@@ -51,25 +45,23 @@ fn get_screens_name() -> Vec<String> {
             is_primary,
             rotation,
             scale_factor,
-        };
+        }
+    }
+}
 
-        let testeDi = DisplayInfo {
-            id,
-            x,
-            y,
-            width,
-            height,
-            is_primary,
-            rotation,
-            scale_factor,
-        };
+#[tauri::command]
+fn get_all_screens_info() -> Vec<String> {
+    let mut infos: Vec<String> = vec![];
+    let screens = Screen::all().unwrap();
 
+    for screen in screens {
+        let display_info = screen.display_info;
+
+        let di = DisplayInfo::convert_from(display_info);
 
         let serialized: String = serde_json::to_string(&di).unwrap();
-        let serializedTest: String = serde_json::to_string(&testeDi).unwrap();
 
         infos.push(serialized);
-        infos.push(serializedTest);
     }
 
     infos
@@ -105,7 +97,7 @@ fn read_pos_on(x: i32, y: i32, width: u32, height: u32) {
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![read_pos_on, get_screens_name])
+        .invoke_handler(tauri::generate_handler![read_pos_on, get_all_screens_info])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

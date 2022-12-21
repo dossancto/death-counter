@@ -9,7 +9,7 @@ function App() {
   const [displaysInfos, setDisplaysInfos] = useState<DisplayInfo[]>([]);
 
   async function greet() {
-    const displays: Array<string> = await invoke("get_screens_name");
+    const displays: Array<string> = await invoke("get_all_screens_info");
     const parsedDisplays: DisplayInfo[] = displays.map(display => JSON.parse(display));
     setDisplaysInfos(parsedDisplays)
   }
